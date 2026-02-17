@@ -83,7 +83,7 @@ const BorrowedAccounts = () => {
 
   // Calculate total borrowed amount
   const totalBorrowedAmount = borrowedLoans.reduce((sum, loan) => {
-    return sum + (loan.loanDetails.amount || 0);
+    return sum + (loan.loanDetails.amount || 0) + (loan.loanDetails.topUpTotal || 0);
   }, 0);
 
   // Calculate total interest owed
@@ -224,7 +224,7 @@ const BorrowedAccounts = () => {
               const lastName = lender.LastName || '';
               const phoneNumber = lender.phoneNumber || 'No phone';
               const firstInitial = firstName.charAt(0).toUpperCase();
-              const amount = loan.loanDetails.amount || 0;
+              const amount = (loan.loanDetails.amount || 0) + (loan.loanDetails.topUpTotal || 0);
               const interest = loan.loanDetails.accruedInterest || 0;
               const totalOwed = amount + interest;
               
