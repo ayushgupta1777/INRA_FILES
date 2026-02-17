@@ -12,7 +12,7 @@ const TakenLoanProfile = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalOpen2, setIsModalOpen2] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  
+
   const [amount1, setAmount1] = useState('');
   const [method, setMethod] = useState('Cash');
   const [additionalInterestRate, setAdditionalInterestRate] = useState('');
@@ -63,28 +63,28 @@ const TakenLoanProfile = () => {
 
   const createRipple = (event) => {
     const button = event.currentTarget;
-    
+
     const ripple = button.querySelector('.taken-loan-ripple');
     if (ripple) {
       ripple.remove();
     }
-    
+
     const circle = document.createElement('span');
     const diameter = Math.max(button.clientWidth, button.clientHeight);
     const radius = diameter / 2;
-    
+
     circle.style.width = circle.style.height = `${diameter}px`;
     circle.style.left = `${event.clientX - button.getBoundingClientRect().left - radius}px`;
     circle.style.top = `${event.clientY - button.getBoundingClientRect().top - radius}px`;
     circle.classList.add('taken-loan-ripple');
-    
+
     button.appendChild(circle);
     setTimeout(() => circle.remove(), 600);
   };
 
   const handleSmoothModalClose = (modalNumber) => {
     const modal = document.querySelector('.taken-loan-topup-container');
-    
+
     if (modal) {
       modal.style.transform = 'translateY(100%)';
       setTimeout(() => {
@@ -122,7 +122,7 @@ const TakenLoanProfile = () => {
         showMessage('error', 'Unauthorized: You do not have access to this loan');
       }
     };
-    
+
     fetchTakenLoanDetails();
   }, [lenderID]);
 
@@ -130,7 +130,7 @@ const TakenLoanProfile = () => {
     const fetchLenderProfile = async () => {
       try {
         const token = localStorage.getItem('token');
-        
+
         const { data } = await axios.get(`https://aero31.vercel.app/api/lender-profile/${lenderID}`, {
           headers: { 'x-auth-token': token }
         });
@@ -142,7 +142,7 @@ const TakenLoanProfile = () => {
         showMessage('error', 'Unauthorized: You do not have access to this lender');
       }
     };
-    
+
     fetchLenderProfile();
   }, [lenderID]);
 
@@ -190,6 +190,10 @@ const TakenLoanProfile = () => {
         date,
         method,
         interestRate: additionalInterestRate || takenLoanDetails?.loanDetails?.interestRate,
+      }, {
+        headers: {
+          'x-auth-token': localStorage.getItem('token')
+        }
       });
 
       showMessage('success', 'Additional loan amount added successfully!');
@@ -198,7 +202,7 @@ const TakenLoanProfile = () => {
       setAdditionalInterestRate('');
       setIsModalOpen(false);
     } catch (error) {
-      showMessage('error', error.response?.data?.message || 'Error adding additional loan amount');
+      showMessage('error', error.response?.data?.message || error.response?.data?.error || 'Error adding additional loan amount');
     } finally {
       setLoading(false);
     }
@@ -216,7 +220,7 @@ const TakenLoanProfile = () => {
         date,
         method
       });
-      
+
       showMessage('success', 'Repayment recorded successfully!');
       setAmount2('');
       setDate('');
@@ -234,7 +238,7 @@ const TakenLoanProfile = () => {
         const response = await axios.put(`https://aero31.vercel.app/api/taken-loan-bill/${lenderID}`, {
           billNumber: newBillNumber
         });
-        
+
         setTakenLoanDetails(response.data);
         showMessage('success', 'Bill number updated successfully!');
       } catch (error) {
@@ -365,10 +369,10 @@ const TakenLoanProfile = () => {
           <div className="taken-loan-profile-container">
             <label htmlFor="fileInput" className="image-upload">
               {profileImage ? (
-                <img src={profileImage} alt="Profile" width={150} height={150} 
-                     style={{ borderRadius: '50%' }} className="taken-loan-profile-image"
-                     onContextMenu={(e) => e.preventDefault()}
-                     draggable="false" />
+                <img src={profileImage} alt="Profile" width={150} height={150}
+                  style={{ borderRadius: '50%' }} className="taken-loan-profile-image"
+                  onContextMenu={(e) => e.preventDefault()}
+                  draggable="false" />
               ) : (
                 <div className="taken-loan-profile-placeholder" style={{ backgroundColor: bgColor }}>
                   {FirstName ? FirstName.charAt(0).toUpperCase() : '?'}
@@ -382,7 +386,7 @@ const TakenLoanProfile = () => {
             <p className="taken-loan-lender-label">Lender</p>
           </div>
         </div>
-     
+
       </div>
 
       {/* Dashboard Cards */}
@@ -396,7 +400,7 @@ const TakenLoanProfile = () => {
               <p className="taken-loan-card-comparison">vs previous month</p>
             </div>
           </div>
-          
+
           <div className="taken-loan-card taken-loan-card-red">
             <div className="taken-loan-card-content">
               <h2 className="taken-loan-card-title">Total Interest Owed</h2>
@@ -405,7 +409,7 @@ const TakenLoanProfile = () => {
               <p className="taken-loan-card-comparison">vs previous month</p>
             </div>
           </div>
-          
+
           <div className="taken-loan-card taken-loan-card-white">
             <div className="taken-loan-card-content">
               <h2 className="taken-loan-card-title">Total Repaid</h2>
@@ -414,7 +418,7 @@ const TakenLoanProfile = () => {
               <p className="taken-loan-card-comparison">vs previous month</p>
             </div>
           </div>
-          
+
           <div className="taken-loan-card taken-loan-card-white">
             <div className="taken-loan-card-content">
               <h2 className="taken-loan-card-title">Remaining Amount</h2>
@@ -464,23 +468,23 @@ const TakenLoanProfile = () => {
         ) : (
           <div className="taken-loan-note-display">
             <p>{note}</p>
-            <FontAwesomeIcon icon={faPen}  onClick={() => setIsEditing(true)} />
+            <FontAwesomeIcon icon={faPen} onClick={() => setIsEditing(true)} />
           </div>
         )}
       </div>
- 
+
 
       {/* Footer */}
       <footer className="taken-loan-footer">
         <div className="taken-loan-footer-container">
           <div className="taken-loan-footer-center">
             <h2 className="taken-loan-footer-logo">
-                 <div className="taken-loan-bill-info" onClick={handleUpdateBillNumber}>
-          <p>Bill #: {billNo}</p>
-          <span className="taken-loan-update-btn">
-            <FontAwesomeIcon icon={faPencil} />
-          </span>
-        </div>
+              <div className="taken-loan-bill-info" onClick={handleUpdateBillNumber}>
+                <p>Bill #: {billNo}</p>
+                <span className="taken-loan-update-btn">
+                  <FontAwesomeIcon icon={faPencil} />
+                </span>
+              </div>
             </h2>
             <ul className="taken-loan-footer-nav">
               <li><a href="#">Home</a></li>
@@ -507,8 +511,8 @@ const TakenLoanProfile = () => {
 
       {/* Dropdown Options */}
       <div className="taken-loan-dropdown-container" ref={menuRef}>
-        <button 
-          className={`taken-loan-dropdown-btn ${isOpen ? 'taken-loan-active' : ''}`} 
+        <button
+          className={`taken-loan-dropdown-btn ${isOpen ? 'taken-loan-active' : ''}`}
           onClick={(e) => {
             createRipple(e);
             setIsOpen(!isOpen);
