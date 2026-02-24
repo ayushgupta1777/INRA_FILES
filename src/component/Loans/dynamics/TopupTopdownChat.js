@@ -13,11 +13,11 @@ const TopupTopdownChat = () => {
   const [topUpHistory, setTopUpHistory] = useState([]);
   const [topDownHistory, setTopDownHistory] = useState([]);
   const [InterestPaymentHistory, setInterestPaymentHistory] = useState([]);
-  
+
   const [bgColor, setBgColor] = useState("");
   const [showOptions, setShowOptions] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState(null);
-  
+
   const optionsMenuRef = useRef(null);
 
   useEffect(() => {
@@ -36,7 +36,7 @@ const TopupTopdownChat = () => {
         setLoading(false);
       }
     };
-    
+
     fetchLoanDetails();
   }, [customerID]);
 
@@ -48,23 +48,23 @@ const TopupTopdownChat = () => {
     axios.get(`https://aero31.vercel.app/api/top-t/${customerID}`, {
       headers: { 'x-auth-token': token }
     })
-    .then(response => {
-      setTopUpHistory(response.data.topUpHistory || []);
-      setTopDownHistory(response.data.topDownHistory || []);
-      setInterestPaymentHistory(response.data.interestPaymentHistory || []);
-    })
-    .catch(error => console.error("Error fetching transaction data:", error))
-    .finally(() => {
-      setLoading(false);
-      
-      // Smooth scroll to top when transactions load
-      setTimeout(() => {
-        const contentElement = document.querySelector('.ttc-loan-chat-content');
-        if (contentElement) {
-          contentElement.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-      }, 100);
-    });
+      .then(response => {
+        setTopUpHistory(response.data.topUpHistory || []);
+        setTopDownHistory(response.data.topDownHistory || []);
+        setInterestPaymentHistory(response.data.interestPaymentHistory || []);
+      })
+      .catch(error => console.error("Error fetching transaction data:", error))
+      .finally(() => {
+        setLoading(false);
+
+        // Smooth scroll to top when transactions load
+        setTimeout(() => {
+          const contentElement = document.querySelector('.ttc-loan-chat-content');
+          if (contentElement) {
+            contentElement.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+        }, 100);
+      });
   }, [customerID]);
 
   const generateRandomColor = () => {
@@ -80,7 +80,7 @@ const TopupTopdownChat = () => {
     setShowOptions(!showOptions);
     setSelectedTransaction(null);
   };
-  
+
   // Close options menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -95,16 +95,16 @@ const TopupTopdownChat = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
-  
+
   const handleTransactionClick = (transaction) => {
     console.log('Transaction clicked:', transaction);
   };
-  
+
   const handleTransactionOptions = (e, transaction) => {
     e.stopPropagation();
     setSelectedTransaction(transaction);
   };
-  
+
   const handlePrintReceipt = () => {
     if (selectedTransaction) {
       console.log('Print receipt for:', selectedTransaction);
@@ -114,15 +114,15 @@ const TopupTopdownChat = () => {
 
   const renderProfileImage = () => {
     if (loading) return <div className="ttc-profile-image-loader"></div>;
-    
+
     if (loanDetails?.profileImage) {
       return (
-        <img 
-          src={loanDetails.profileImage} 
-          alt="Profile" 
-          className="ttc-loan-profile-image-lp" 
-          onContextMenu={(e) => e.preventDefault()} 
-          draggable="false" 
+        <img
+          src={loanDetails.profileImage}
+          alt="Profile"
+          className="ttc-loan-profile-image-lp"
+          onContextMenu={(e) => e.preventDefault()}
+          draggable="false"
         />
       );
     } else {
@@ -136,7 +136,7 @@ const TopupTopdownChat = () => {
 
   // Get transaction display properties
   const getTransactionDisplay = (type) => {
-    switch(type) {
+    switch (type) {
       case "topup":
         return {
           icon: "↗️",
@@ -176,7 +176,7 @@ const TopupTopdownChat = () => {
     const options = { day: 'numeric', month: 'short', year: 'numeric' };
     return new Date(dateString).toLocaleDateString('en-GB', options);
   };
-  
+
   // Format currency
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-IN', {
@@ -186,22 +186,30 @@ const TopupTopdownChat = () => {
     }).format(amount);
   };
 
+  const calculateTopUpInterest = (amount, rate, date) => {
+    if (!amount || !rate || !date) return 0;
+    const daysElapsed = Math.floor((new Date() - new Date(date)) / (1000 * 60 * 60 * 24));
+    if (daysElapsed <= 0) return 0;
+    const dailyRate = parseFloat(rate) / 100 / 30;
+    return Math.floor(amount * dailyRate * daysElapsed);
+  };
+
   return (
     <div className="ttc-loan-chat-container">
       {/* Header */}
       <div className="ttc-loan-chat-header">
-        <button 
-          className="ttc-back-button" 
-          onClick={handleBackClick} 
+        <button
+          className="ttc-back-button"
+          onClick={handleBackClick}
           aria-label="Go back"
         >
           &#8592;
         </button>
-        
+
         <h2 className="ttc-customer-name">
           {loading ? "Loading..." : (loanDetails?.name || "Transaction History")}
         </h2>
-        
+
         <div className="ttc-loan-profile-container-lp">
           {renderProfileImage()}
         </div>
@@ -222,7 +230,7 @@ const TopupTopdownChat = () => {
           ) : (
             transactions.map((transaction, index) => {
               const display = getTransactionDisplay(transaction.type);
-              
+
               return (
                 <div
                   key={transaction._id || index}
@@ -236,11 +244,16 @@ const TopupTopdownChat = () => {
                     </div>
                     <div className="ttc-loan-transaction-details">
                       <p className="ttc-loan-transfer-label">
-                        {display.label}
+                        {display.label} {transaction.type === 'topup' && transaction.topupinterestrate ? `(${transaction.topupinterestrate}%)` : ''}
                       </p>
                       <p className="ttc-loan-amount">
                         {formatCurrency(transaction.amount)}
                       </p>
+                      {transaction.type === 'topup' && transaction.topupinterestrate && (
+                        <p className="ttc-loan-method" style={{ color: '#ff9800', marginTop: '4px' }}>
+                          Interest till today: {formatCurrency(calculateTopUpInterest(transaction.amount, transaction.topupinterestrate, transaction.date))}
+                        </p>
+                      )}
                       <p className="ttc-loan-method">{formatDate(transaction.date)}</p>
                     </div>
                   </div>

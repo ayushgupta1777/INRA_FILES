@@ -3,6 +3,9 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../../style/loans/profiles.css";
 import { ThreeDot } from "react-loading-indicators";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTrash, faExclamationTriangle } from "@fortawesome/free-solid-svg-icons";
+import "../../style/loans/delete-modal.css"; // Improved Delete Modal Styles
 import { 
   Search, 
   X, 
@@ -36,6 +39,36 @@ const TransactionsList = () => {
   
   const addButtonRef = useRef(null);
   const menuRef = useRef(null);
+
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [transactionToDelete, setTransactionToDelete] = useState(null);
+
+  const handleDeleteClick = (transaction) => {
+    setTransactionToDelete(transaction);
+    setIsDeleteModalOpen(true);
+    setMenuOpenForId(null); // Close menu
+  };
+
+  const confirmDelete = async () => {
+    if (!transactionToDelete) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      await axios.delete(`https://aero31.vercel.app/api/delete-customer-profile/${transactionToDelete.customerID}`, {
+        headers: { 'x-auth-token': token }
+      });
+      
+      // Update UI
+      setTransactions(prev => prev.filter(t => t.customerID !== transactionToDelete.customerID));
+      setResults(prev => prev.filter(t => t.customerID !== transactionToDelete.customerID));
+      
+      setIsDeleteModalOpen(false);
+      setTransactionToDelete(null);
+    } catch (error) {
+      console.error('Error deleting profile:', error);
+      alert('Failed to delete profile');
+    }
+  };
 
   // Helper function to calculate grand total
   const calculateGrandTotal = (transaction) => {
@@ -375,7 +408,7 @@ const TransactionsList = () => {
 
                       <div className="transaction-info-profiles">
                         <p><strong>Total Amount:</strong> {formatCurrency(grandTotal)}</p>
-                        <p><strong>Added On:</strong> {new Date(correspondingProfile?.createdAt || Date.now()).toLocaleDateString("en-GB")}</p>
+                        <p><strong>Loan Start Date:</strong> {new Date(correspondingProfile?.loanDetails?.startDate || correspondingProfile?.createdAt || Date.now()).toLocaleDateString("en-GB")}</p>
                       </div>
                       
                       <div className="menu-container-profiles" ref={menuRef}>
@@ -392,7 +425,13 @@ const TransactionsList = () => {
                               <Edit size={14} style={{ marginRight: '8px' }} />
                               Edit
                             </div>
-                            <div className="menu-option-profiles delete-option-profiles">
+                            <div 
+                              className="menu-option-profiles delete-option-profiles"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteClick(result);
+                              }}
+                            >
                               <Trash2 size={14} style={{ marginRight: '8px' }} />
                               Delete
                             </div>
@@ -448,7 +487,7 @@ const TransactionsList = () => {
                   
                   <div className="transaction-info-profiles">
                     <p><strong>Total Amount:</strong> {formatCurrency(grandTotal)}</p>
-                    <p><strong>Added On:</strong> {new Date(transaction.createdAt).toLocaleDateString("en-GB")}</p>
+                    <p><strong>Loan Start Date:</strong> {new Date(transaction?.loanDetails?.startDate || transaction.createdAt).toLocaleDateString("en-GB")}</p>
                   </div>
                   
                   <div className="menu-container-profiles" ref={menuRef}>
@@ -465,7 +504,13 @@ const TransactionsList = () => {
                           <Edit size={14} style={{ marginRight: '8px' }} />
                           Edit
                         </div>
-                        <div className="menu-option-profiles delete-option-profiles">
+                        <div 
+                          className="menu-option-profiles delete-option-profiles"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteClick(transaction);
+                          }}
+                        >
                           <Trash2 size={14} style={{ marginRight: '8px' }} />
                           Delete
                         </div>
@@ -579,6 +624,7 @@ const TransactionsList = () => {
         </div>
       )}
 
+
       {selectedTransaction && (
         <div className="modal-backdrop-profiles" onClick={closeModal}>
           <div className="modal-content-profiles" onClick={(e) => e.stopPropagation()}>
@@ -617,6 +663,38 @@ const TransactionsList = () => {
                 className="add-new-button-profiles"
               >
                 View Full Details
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {isDeleteModalOpen && (
+        <div className="modal-overlay-custom">
+          <div className="delete-modal-content">
+            <div className="delete-icon-wrapper">
+              <FontAwesomeIcon icon={faTrash} shake />
+            </div>
+            <h3 className="delete-modal-title">Delete Profile?</h3>
+            <p className="delete-modal-text">
+              Are you sure you want to delete <strong>{transactionToDelete?.customerName || 'this profile'}</strong>?
+              <br />
+              <span style={{ fontSize: '0.9rem', color: '#ef4444' }}>This will remove the customer profile and all associated loan data.</span>
+            </p>
+            
+            <div className="modal-actions">
+              <button 
+                className="btn-cancel" 
+                onClick={() => setIsDeleteModalOpen(false)}
+              >
+                Cancel
+              </button>
+              <button 
+                className="btn-delete" 
+                onClick={confirmDelete}
+              >
+                Delete Forever
               </button>
             </div>
           </div>
