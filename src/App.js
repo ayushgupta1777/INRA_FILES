@@ -26,12 +26,13 @@ import Loans from './component/Loans/loan';
 import Land_money_form from './component/Home/Customer_Form';
 import Loan_form from './component/Loans/LoanForm';
 import Loan_profile from './component/Loans/loan-profile';
+import TakenLoanHistory from './component/Take_loan/TakenLoanHistory';
 import DetailPage from './component/Home/DetailPage';
 import SignaturePage from './component/Loans/SignaturePage';
 import Home_lone from './component/Loans/home_l';
 import Transaction from './component/Loans/transaction';
 import Customer_Profiles from './component/Loans/Profiles';
-import  Receipt from './component/Loans/dynamics/ReceiptPage';
+import Receipt from './component/Loans/dynamics/ReceiptPage';
 import Graph from './component/Loans/dynamics/graph';
 import TopT from './component/Loans/dynamics/TopupTopdownChat';
 
@@ -49,19 +50,19 @@ function App() {
     <Router>
       <Routes>
         {/* Public Routes */}
-      
+
         <Route path='/login' element={
           <GoogleOAuthProvider clientId="679832363574-9don8skic3d6n3r8geli6ippcbrip1pe.apps.googleusercontent.com">
             <Login />
           </GoogleOAuthProvider>
 
         } />        <Route path='/signup' element={<Signup />} />
-        <Route path='/auth' element={<Auth/>}/>
-       
-        <Route path='/otp' element={<Otp />} />
-        <Route path='/forgot-password' element={<Forgetpassword/>}/>
+        <Route path='/auth' element={<Auth />} />
 
-        
+        <Route path='/otp' element={<Otp />} />
+        <Route path='/forgot-password' element={<Forgetpassword />} />
+
+
         {/* Private Routes */}
         <Route
           path="/"
@@ -71,7 +72,7 @@ function App() {
             </PrivateRoute>
           }
         />
-            <Route
+        <Route
           path="/home"
           element={
             <PrivateRoute>
@@ -105,10 +106,10 @@ function App() {
         />
         <Route
           path="/profile/:customerId" element={
-          <PrivateRoute><Pf/>
-          </PrivateRoute>}
-          />
-                        <Route
+            <PrivateRoute><Pf />
+            </PrivateRoute>}
+        />
+        <Route
           path="/borrowed-accounts"
           element={
             <PrivateRoute>
@@ -156,7 +157,7 @@ function App() {
             </PrivateRoute>
           }
         />
-    
+
         <Route
           path="/land_money_form"
           element={
@@ -214,7 +215,7 @@ function App() {
           }
         />
 
-<Route
+        <Route
           path="/receipt/:customerID"
           element={
             <PrivateRoute>
@@ -265,7 +266,7 @@ function App() {
           }
         />
 
-                <Route
+        <Route
           path="/take_loan_form/:lenderID"
           element={
             <PrivateRoute>
@@ -273,7 +274,7 @@ function App() {
             </PrivateRoute>
           }
         />
-                        <Route
+        <Route
           path="/taken_loan_profile/:lenderID"
           element={
             <PrivateRoute>

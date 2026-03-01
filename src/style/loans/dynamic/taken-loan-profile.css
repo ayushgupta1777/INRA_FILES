@@ -54,7 +54,7 @@
 
 .taken-loan-card-red {
   background: linear-gradient(to bottom, #b8e994, #78e08f);
-  color: white;  
+  color: white;
 }
 
 .taken-loan-card-content {
@@ -91,7 +91,8 @@
   color: #f44336;
 }
 
-.taken-loan-card-comparison, .taken-loan-card-update-text {
+.taken-loan-card-comparison,
+.taken-loan-card-update-text {
   font-size: 14px;
   color: #666;
   margin-top: auto;
@@ -119,7 +120,7 @@
     background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
     padding: 7px;
   }
-  
+
   .taken-loan-dashboard-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -129,12 +130,12 @@
     width: 100%;
     height: 100%;
   }
-  
+
   .taken-loan-card {
     padding: 20px;
     aspect-ratio: 1 / 1;
   }
-  
+
   .taken-loan-card-amount {
     font-size: 28px;
   }
@@ -142,7 +143,7 @@
 
 /* Header Section */
 .taken-loan-header {
-  background: rgba(255, 255, 255, 0.2); 
+  background: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(12px);
   color: #fff;
   border-bottom-right-radius: 20px;
@@ -246,7 +247,7 @@
 /* Read More Button */
 .taken-loan-read-more-btn {
   position: absolute;
-  bottom: 100px; 
+  bottom: 100px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -299,6 +300,7 @@
   0% {
     transform: translateY(-50%) rotate(0deg);
   }
+
   100% {
     transform: translateY(-50%) rotate(360deg);
   }
@@ -377,7 +379,7 @@
 
 .taken-loan-note-display {
   position: relative;
-  
+
 }
 
 .taken-loan-note-display p {
@@ -610,9 +612,9 @@
   opacity: 0;
   visibility: hidden;
   transform-origin: bottom right;
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), 
-              opacity 0.25s ease, 
-              visibility 0.25s;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity 0.25s ease,
+    visibility 0.25s;
 }
 
 .taken-loan-dropdown-menu.taken-loan-show {
@@ -641,6 +643,10 @@
 
 .taken-loan-dropdown-menu.taken-loan-show .taken-loan-dropdown-item:nth-child(2) {
   animation: fadeInUp 0.3s 0.1s forwards;
+}
+
+.taken-loan-dropdown-menu.taken-loan-show .taken-loan-dropdown-item:nth-child(3) {
+  animation: fadeInUp 0.3s 0.15s forwards;
 }
 
 @keyframes fadeInUp {
@@ -742,7 +748,9 @@
   align-items: center;
 }
 
-.taken-loan-topup-input, .taken-loan-topup-select, .taken-loan-date-input {
+.taken-loan-topup-input,
+.taken-loan-topup-select,
+.taken-loan-date-input {
   width: 80%;
   font-size: 18px;
   padding: 10px;
@@ -753,7 +761,9 @@
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.taken-loan-topup-input:focus, .taken-loan-topup-select:focus, .taken-loan-date-input:focus {
+.taken-loan-topup-input:focus,
+.taken-loan-topup-select:focus,
+.taken-loan-date-input:focus {
   outline: none;
   border-color: #56ab2f;
   box-shadow: 0 0 0 3px rgba(86, 171, 47, 0.2);
@@ -863,6 +873,11 @@
 }
 
 @keyframes growLine {
-  from { width: 0; }
-  to { width: 100%; }
+  from {
+    width: 0;
+  }
+
+  to {
+    width: 100%;
+  }
 }

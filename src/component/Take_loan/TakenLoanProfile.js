@@ -17,7 +17,10 @@ const TakenLoanProfile = () => {
   const [method, setMethod] = useState('Cash');
   const [additionalInterestRate, setAdditionalInterestRate] = useState('');
   const [amount2, setAmount2] = useState('');
+  const [amount3, setAmount3] = useState('');
   const [date, setDate] = useState('');
+
+  const [isModalOpen3, setIsModalOpen3] = useState(false);
 
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
@@ -90,39 +93,42 @@ const TakenLoanProfile = () => {
       setTimeout(() => {
         if (modalNumber === 1) {
           setIsModalOpen(false);
-        } else {
+        } else if (modalNumber === 2) {
           setIsModalOpen2(false);
+        } else if (modalNumber === 3) {
+          setIsModalOpen3(false);
         }
       }, 400);
     } else {
       if (modalNumber === 1) {
         setIsModalOpen(false);
-      } else {
+      } else if (modalNumber === 2) {
         setIsModalOpen2(false);
+      } else if (modalNumber === 3) {
+        setIsModalOpen3(false);
       }
     }
   };
 
+  const fetchTakenLoanDetails = async () => {
+    setBgColor(generateRandomColor());
+
+    try {
+      const token = localStorage.getItem('token');
+
+      const { data } = await axios.get(`https://aero31.vercel.app/api/taken-loan-profile/${lenderID}`, {
+        headers: { 'x-auth-token': token }
+      });
+      setTakenLoanDetails(data);
+      setLoading(false);
+    } catch (err) {
+      setError('Error fetching taken loan details. Please try again.');
+      setLoading(false);
+      showMessage('error', 'Unauthorized: You do not have access to this loan');
+    }
+  };
+
   useEffect(() => {
-    const fetchTakenLoanDetails = async () => {
-      setBgColor(generateRandomColor());
-
-      try {
-        const token = localStorage.getItem('token');
-
-        const { data } = await axios.get(`https://aero31.vercel.app/api/taken-loan-profile/${lenderID}`, {
-          headers: { 'x-auth-token': token }
-        });
-        setTakenLoanDetails(data);
-        showMessage('success', 'Successfully loaded taken loan details');
-        setLoading(false);
-      } catch (err) {
-        setError('Error fetching taken loan details. Please try again.');
-        setLoading(false);
-        showMessage('error', 'Unauthorized: You do not have access to this loan');
-      }
-    };
-
     fetchTakenLoanDetails();
   }, [lenderID]);
 
@@ -225,11 +231,37 @@ const TakenLoanProfile = () => {
       setAmount2('');
       setDate('');
       setIsModalOpen2(false);
+      fetchTakenLoanDetails();
     } catch (err) {
       console.error('Error processing repayment:', err);
       showMessage('error', 'Failed to process repayment. Try again.');
     }
   };
+
+  const handleInterestPayment = async () => {
+    if (!amount3 || !date) {
+      showMessage('error', 'Please enter interest amount and date.');
+      return;
+    }
+
+    try {
+      const response = await axios.put(`https://aero31.vercel.app/api/taken-loan-interest-payment/${lenderID}`, {
+        amount: parseFloat(amount3),
+        date,
+        method
+      });
+
+      showMessage('success', 'Interest payment recorded successfully!');
+      setAmount3('');
+      setDate('');
+      setIsModalOpen3(false);
+      fetchTakenLoanDetails();
+    } catch (err) {
+      console.error('Error processing interest payment:', err);
+      showMessage('error', 'Failed to process interest payment. Try again.');
+    }
+  };
+
 
   const handleUpdateBillNumber = async () => {
     const newBillNumber = prompt('Enter new bill number:');
@@ -304,8 +336,8 @@ const TakenLoanProfile = () => {
     navigate('/home');
   };
 
-  const handleDetailPage = () => {
-    navigate(`/taken-loan-details/${lenderID}`);
+  const handleHistory = () => {
+    navigate(`/taken-loan-history/${lenderID}`);
   };
 
   const handleReceipt = () => {
@@ -532,7 +564,13 @@ const TakenLoanProfile = () => {
             setIsModalOpen2(true);
             setIsOpen(false);
           }}>
-            <span className="taken-loan-dropdown-icon">💵</span> MAKE REPAYMENT
+            <span className="taken-loan-dropdown-icon">💵</span> PAY PRINCIPAL
+          </div>
+          <div className="taken-loan-dropdown-item" onClick={() => {
+            setIsModalOpen3(true);
+            setIsOpen(false);
+          }}>
+            <span className="taken-loan-dropdown-icon">💰</span> PAY INTEREST
           </div>
         </div>
       </div>
@@ -602,9 +640,9 @@ const TakenLoanProfile = () => {
               e.stopPropagation();
               handleSmoothModalClose(2);
             }}>✖</button>
-            <h2 className="taken-loan-topup-title">Make Repayment</h2>
+            <h2 className="taken-loan-topup-title">Pay Principal</h2>
             <div className="taken-loan-topup-box">
-              <label className="taken-loan-topup-label">Repayment Amount</label>
+              <label className="taken-loan-topup-label">Principal Amount</label>
               <input
                 type="number"
                 value={amount2}
@@ -634,6 +672,61 @@ const TakenLoanProfile = () => {
           </div>
         </div>
       )}
+
+      {/* Pay Interest Modal */}
+      {isModalOpen3 && (
+        <div className="taken-loan-modal-overlay" onClick={(e) => {
+          if (e.target.classList.contains('taken-loan-modal-overlay')) {
+            handleSmoothModalClose(3);
+          }
+        }}>
+          <div className="taken-loan-topup-container">
+            <button className="taken-loan-close-button" onClick={(e) => {
+              e.stopPropagation();
+              handleSmoothModalClose(3);
+            }}>✖</button>
+            <h2 className="taken-loan-topup-title">Pay Interest</h2>
+            <div className="taken-loan-topup-box">
+              <p className="taken-loan-info-text" style={{ marginBottom: '10px', fontSize: '0.9rem', color: '#666' }}>
+                Available Interest: ₹{formatToIndianCurrency(Math.floor(totalInterest || 0))}
+              </p>
+              <label className="taken-loan-topup-label">Interest Amount</label>
+              <input
+                type="number"
+                value={amount3}
+                onChange={(e) => setAmount3(Math.max(0, e.target.value))}
+                className="taken-loan-topup-input"
+                placeholder="₹ 0"
+                min="0"
+                max={totalInterest}
+              />
+              <button onClick={(e) => {
+                createRipple(e);
+                handleInterestPayment();
+              }} className="taken-loan-topup-button" disabled={loading || !totalInterest || totalInterest <= 0}>
+                {loading ? 'Processing...' : 'Pay Interest'}
+              </button>
+              <div className="taken-loan-input-group">
+                <label className="taken-loan-topup-label">Date:</label>
+                <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="taken-loan-date-input" />
+              </div>
+            </div>
+            <label className="taken-loan-topup-label">Payment Method:</label>
+            <select value={method} onChange={(e) => setMethod(e.target.value)} className="taken-loan-topup-select">
+              <option value="Cash">Cash</option>
+              <option value="Bank Transfer">Bank Transfer</option>
+              <option value="Credit Card">Credit Card</option>
+              <option value="UPI">UPI</option>
+            </select>
+            {(!totalInterest || totalInterest <= 0) && (
+              <p className="taken-loan-warning-text" style={{ color: 'red', marginTop: '10px', fontSize: '0.8rem' }}>
+                ⚠️ No interest available to pay
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+
 
       <Message type={message.type} text={message.text} />
     </div>
